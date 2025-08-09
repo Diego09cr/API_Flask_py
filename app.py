@@ -22,6 +22,18 @@ def get_id(id):
         return jsonify(users[id])
     else:
         return jsonify({"Erro": "User not found"})
+    
+@app.route('/Users/<int:id>', methods=['PUT'])
+def upgrade_user(id):
+    if id in users:
+        data_json = request.get_json()
+        users[id]["name"] = data_json.get("name")
+        users[id]["email"] = data_json.get("email")
+        return jsonify(users[id])
+    else:
+        return jsonify({"User": "not found"})
+        
+        
 
 if __name__ == '__main__':
     app.run(debug=True)
