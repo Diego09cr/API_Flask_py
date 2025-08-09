@@ -32,8 +32,14 @@ def upgrade_user(id):
         return jsonify(users[id])
     else:
         return jsonify({"User": "not found"})
-        
-        
+    
+@app.route('/Users/<int:id>', methods=['DELETE'])
+def delete_user(id):
+    if id in users:
+        del(users[id])
+        return jsonify({"User": "Deleted successfully"})
+    else:
+        return jsonify({"User": "not found"})
 
 if __name__ == '__main__':
     app.run(debug=True)
