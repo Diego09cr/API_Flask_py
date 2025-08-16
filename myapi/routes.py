@@ -1,42 +1,42 @@
-from myapi.models import users, users_id
+from myapi import db
+from myapi.models import User
 from flask import Blueprint, jsonify, request
 
 bp = Blueprint('users', __name__)
 
 @bp.route('/Users', methods=['POST'])
-def createuser():
-    global users_id
-    data_json = request.get_json()
-    user = {
-        "id": users_id,
-        "name": data_json.get("name"),
-        "email": data_json.get("email")
-    }
-    users[users_id] = user
-    users_id += 1
-    return jsonify(user)
+def create_user():
+    data = request.get_json()
+    user = User(name=data.get("name"), email=data.get("email"))
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({"id": user.id, "name": user.name, "email": user.email})
 
 @bp.route('/Users/<int:id>', methods=['GET'])
-def get_id(id):
-    if id in users:
-        return jsonify(users[id])
-    else:
-        return jsonify({"Erro": "User not found"})
-    
+def get_user(id):
+    user = User.query.get(id)
+    if user:
+        return jsonify({"id": user.id, "name": user.name, "email": user.email})
+    return jsonify({"error": "User not found"}), 404
+
 @bp.route('/Users/<int:id>', methods=['PUT'])
-def upgrade_user(id):
-    if id in users:
-        data_json = request.get_json()
-        users[id]["name"] = data_json.get("name")
-        users[id]["email"] = data_json.get("email")
-        return jsonify(users[id])
-    else:
-        return jsonify({"User": "not found"})
+def update_user(id):
+    user = User.query.get(id)
+    if user:
+        data = request.get_json()
+        user.name = data.get("name")
+        user.email = data.get("email")
+        db.session.commit()
+        return jsonify({"id": user.id, "name": user.name, "email": user.email})
+    return jsonify({"error": "User not found"}), 404
     
 @bp.route('/Users/<int:id>', methods=['DELETE'])
 def delete_user(id):
-    if id in users:
-        del(users[id])
-        return jsonify({"User": "Deleted successfully"})
-    else:
-        return jsonify({"User": "not found"})
+    user = User.query.get(id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"})
+    return jsonify({"error": "User not found"}), 404
