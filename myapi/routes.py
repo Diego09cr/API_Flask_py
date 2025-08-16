@@ -1,9 +1,9 @@
-from flask import Flask, jsonify, request
-app = Flask(__name__)
-users = {}
-users_id = 1
+from myapi.models import users, users_id
+from flask import Blueprint, jsonify, request
 
-@app.route('/Users', methods=['POST'])
+bp = Blueprint('users', __name__)
+
+@bp.route('/Users', methods=['POST'])
 def createuser():
     global users_id
     data_json = request.get_json()
@@ -16,14 +16,14 @@ def createuser():
     users_id += 1
     return jsonify(user)
 
-@app.route('/Users/<int:id>', methods=['GET'])
+@bp.route('/Users/<int:id>', methods=['GET'])
 def get_id(id):
     if id in users:
         return jsonify(users[id])
     else:
         return jsonify({"Erro": "User not found"})
     
-@app.route('/Users/<int:id>', methods=['PUT'])
+@bp.route('/Users/<int:id>', methods=['PUT'])
 def upgrade_user(id):
     if id in users:
         data_json = request.get_json()
@@ -33,13 +33,10 @@ def upgrade_user(id):
     else:
         return jsonify({"User": "not found"})
     
-@app.route('/Users/<int:id>', methods=['DELETE'])
+@bp.route('/Users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     if id in users:
         del(users[id])
         return jsonify({"User": "Deleted successfully"})
     else:
         return jsonify({"User": "not found"})
-
-if __name__ == '__main__':
-    app.run(debug=True)
